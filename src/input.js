@@ -1,57 +1,61 @@
-import React from 'react';
-import listItem from './listItem.css';
+import React, { useState } from 'react';
+// import listItem from './listItem.css';
 
-export default class TODO extends React.Component {
-    state = {
-        todo: "",
-        todoArr: [],
-    };
-    render() {
-        const addItem = () => {
-            const list = [...this.state.todoArr, this.state.todo];
-            this.setState({ todoArr: list, todo: '' });
+export default function TODO (){
+    const [todo, setTodo] = useState('');
+    const [todoArr, setTodoArr] = useState([]);
+
+    const addItem = (newTask) => {
+        localStorage.setItem('todoList', JSON.stringify(todoArr));
+        setTodoArr([...todoArr, newTask]);
+        setTodo('');
+        console.log(todoArr)
+        
         };
+    const changeTask = (e)=> {
+        setTodo(e.target.value);
+    }       
         return (
             <div>
-                <input type="text" placeholder="enter here" onChange={(e) => this.setState({ todo: e.target.value })} value={this.state.todo} />
-                <button onClick={addItem}>ADD</button>
-                {this.state.todoArr.map((todo, i) => {
-                    
-                        return  <List i={i} todo={todo}/>
-                
-                   
+                <input type="text" placeholder="enter here" onInput={changeTask} value={todo} />
+                <button onClick={()=> addItem(todo)}>ADD</button>
+                {todoArr.map((todo, i) => {
+                        return  <List key={Math.random()*500} i={i} todo={todo}/>
                 })}
             </div>
         )
-    }
 }
 
-class List extends React.Component {   
-    state = {
-        isCompleted : false,
-        isExist : "true"
-    };
-   
-    render() {
-        
-        const removeItem = () => {
-           this.setState({ isExist: !this.isExist});
-        }
-        const completed = () => {
-           this.setState({isCompleted: "false"})
-        }
-       if(this.state.isExist === "true"){ 
+export function createdTaskList(){
+    let allTasks = JSON.parse(localStorage.getItem('todoList'));
+    return (
+        <ul>
+           {allTasks.map((t, i) => { return <List key={Math.random()*500} i={i} todo={allTasks[i]}/>})}
+        </ul>
+    )
+}
+ 
+function List (props) {   
+    
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [isExist, setIsExist] = useState('true');
+     
+    const removeItem = () => {
+        setIsExist({ isExist: "false"});
+    }
+    const completed = () => {
+        setIsCompleted({isCompleted: true});
+    }
+
+    if(isExist === 'true'){ 
         return (
-            <li className={this.state.isCompleted ? "listItemLine" : "listItem"} key={this.props.i}>{this.props.todo}
-                       <div>
-                           <button  onClick={removeItem}>&#x2715;</button>
-                           <button onClick={completed}>&#10004;</button>
-                       </div>
+           <li className={isCompleted  ? "listItemLine" : "listItem"} key={props.i}>{props.todo}
+                     <div >
+                       <button  onClick={removeItem}>&#x2715;</button>
+                       <button  onClick={completed}>&#10004;</button>
+                   </div>
             </li>             
-           
+       
        ) 
-      }
     }
 }
-
-
